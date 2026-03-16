@@ -12,6 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/http"
+
 	_ "go.uber.org/automaxprocs"
 )
 
@@ -22,7 +23,7 @@ var (
 	// Version is the version of the compiled software.
 	Version string
 	// flag conf is the config flag.
-	flagconf string
+	flagconf string // 配置文件路径
 
 	id, _ = os.Hostname()
 )
@@ -33,6 +34,7 @@ func init() {
 }
 
 func newApp(logger log.Logger, hs *http.Server) *kratos.App {
+
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -44,10 +46,13 @@ func newApp(logger log.Logger, hs *http.Server) *kratos.App {
 			hs,
 		),
 	)
+
 }
 
 func main() {
+
 	flag.Parse()
+
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
@@ -57,6 +62,7 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
@@ -68,19 +74,23 @@ func main() {
 		panic(err)
 	}
 
-	var bc conf.Bootstrap
+	var bc conf.Bootstrap // 配置对象
+
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Auth, bc.Casbin, bc.Oss, logger, bc.Data.Redis)
+
 	if err != nil {
 		panic(err)
 	}
+
 	defer cleanup()
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
+
 }

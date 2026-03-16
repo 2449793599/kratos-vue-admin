@@ -12,11 +12,13 @@ import (
 
 // NewGRPCServer new a gRPC server.
 func NewGRPCServer(c *conf.Server, sysuser *service.SysuserService, logger log.Logger) *grpc.Server {
+
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
 		),
 	}
+
 	if c.Grpc.Network != "" {
 		opts = append(opts, grpc.Network(c.Grpc.Network))
 	}
@@ -26,7 +28,11 @@ func NewGRPCServer(c *conf.Server, sysuser *service.SysuserService, logger log.L
 	if c.Grpc.Timeout != nil {
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
+
 	srv := grpc.NewServer(opts...)
+
 	v1.RegisterSysuserServer(srv, sysuser)
+
 	return srv
+
 }

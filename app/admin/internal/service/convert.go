@@ -7,19 +7,26 @@ import (
 )
 
 func ConvertApiBaseFromList(list [][]string) []*pb.ApiBase {
+
 	data := make([]*pb.ApiBase, len(list))
+
 	for i, v := range list {
 		data[i] = &pb.ApiBase{
 			Path:   v[1],
 			Method: v[2],
 		}
 	}
+
 	return data
+
 }
 
 func ConvertApiDataFromApiList(list []*model.SysAPI) []*pb.ApiData {
+
 	data := make([]*pb.ApiData, len(list))
+
 	for i, d := range list {
+
 		data[i] = &pb.ApiData{
 			Id:          int32(d.ID),
 			Path:        d.Path,
@@ -29,6 +36,9 @@ func ConvertApiDataFromApiList(list []*model.SysAPI) []*pb.ApiData {
 			CreateTime:  util.NewTimestamp(d.CreatedAt),
 			UpdateTime:  util.NewTimestamp(d.UpdatedAt),
 		}
+
 	}
+
 	return data
+
 }

@@ -8,7 +8,9 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/auth/jwt"
 	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/go-kratos/kratos/v2/transport/http"
+
 	jwtV4 "github.com/golang-jwt/jwt/v4"
+
 	"github.com/tx7do/kratos-casbin/authz"
 )
 
@@ -37,22 +39,33 @@ func NewSecurityUser() authz.SecurityUser {
 }
 
 func (su *securityUser) ParseFromContext(ctx context.Context) error {
+
 	claims, err := FromContext(ctx)
+
 	if err != nil {
 		return err
 	}
+
 	su.AuthorityId = claims.RoleKey
+
 	ts, ok := transport.FromServerContext(ctx)
+
 	if !ok {
 		return ErrClaimsMiss
 	}
+
 	su.Path = ts.Operation()
+
 	ht, ok := ts.(http.Transporter)
+
 	if !ok {
 		return ErrClaimsMiss
 	}
+
 	su.Method = ht.Request().Method
+
 	return nil
+
 }
 
 func (su *securityUser) GetSubject() string {
@@ -72,22 +85,31 @@ func (su *securityUser) GetDomain() string {
 }
 
 func FromContext(ctx context.Context) (*TokenClaims, error) {
+
 	claims, ok := jwt.FromContext(ctx)
+
 	if !ok {
 		return nil, ErrTokenMiss
 	}
+
 	return claims.(*TokenClaims), nil
+
 }
 
 func MustFromContext(ctx context.Context) *TokenClaims {
+
 	claims, err := FromContext(ctx)
+
 	if err != nil {
 		panic(err)
 	}
+
 	return claims
+
 }
 
 func NewToken(key string, expireAt time.Time, userID, roleID int64, roleKey, nickname string) (string, error) {
+
 	claims := jwtV4.NewWithClaims(jwtV4.SigningMethodHS256, &TokenClaims{
 		UserID:   userID,
 		RoleID:   roleID,
@@ -98,5 +120,7 @@ func NewToken(key string, expireAt time.Time, userID, roleID int64, roleKey, nic
 			ExpiresAt: jwtV4.NewNumericDate(expireAt),
 		},
 	})
+
 	return claims.SignedString([]byte(key))
+
 }

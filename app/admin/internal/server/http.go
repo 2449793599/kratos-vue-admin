@@ -24,13 +24,17 @@ import (
 )
 
 func jsonMarshal(res *pb.CommonReply) ([]byte, error) {
+
 	newProto := protojson.MarshalOptions{EmitUnpopulated: true}
+
 	output, err := newProto.Marshal(res)
+
 	if err != nil {
 		return nil, err
 	}
 
 	var stuff map[string]any
+
 	if err := json.Unmarshal(output, &stuff); err != nil {
 		return nil, err
 	}
@@ -38,45 +42,68 @@ func jsonMarshal(res *pb.CommonReply) ([]byte, error) {
 	if stuff["data"] != nil {
 		delete(stuff["data"].(map[string]any), "@type")
 	}
+
 	return json.MarshalIndent(stuff, "", "  ")
+
 }
 
 func EncoderResponse() http.EncodeResponseFunc {
+
 	return func(w stdhttp.ResponseWriter, request *stdhttp.Request, i interface{}) error {
+
 		resp := &pb.CommonReply{
 			Code:    200,
 			Message: "",
 		}
+
 		var data []byte
+
 		var err error
+
 		if m, ok := i.(proto.Message); ok {
+
 			payload, err := anypb.New(m)
+
 			if err != nil {
 				return err
 			}
+
 			resp.Data = payload
+
 			data, err = jsonMarshal(resp)
+
 			if err != nil {
 				return err
 			}
+
 		} else {
+
 			dataMap := map[string]interface{}{
 				"code":    200,
 				"message": "",
 				"data":    i,
 			}
+
 			data, err = json.Marshal(dataMap)
+
 			if err != nil {
 				return err
 			}
+
 		}
+
 		w.Header().Set("Content-Type", "application/json")
+
 		_, err = w.Write(data)
+
 		if err != nil {
 			return err
 		}
+
 		return nil
+
 	}
+
 }
 
 // NewHTTPServer new an HTTP server.
@@ -94,6 +121,7 @@ func NewHTTPServer(
 	dictDataService *service.DictDataService,
 	roleService *service.RolesService,
 ) *http.Server {
+
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -112,13 +140,17 @@ func NewHTTPServer(
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
 	}
+
 	if c.Http.Addr != "" {
 		opts = append(opts, http.Address(c.Http.Addr))
 	}
+
 	if c.Http.Timeout != nil {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
+
 	srv := http.NewServer(opts...)
+
 	v1.RegisterSysuserHTTPServer(srv, sysUserService)
 	v1.RegisterApiHTTPServer(srv, apiService)
 	v1.RegisterDeptHTTPServer(srv, deptService)
@@ -130,8 +162,11 @@ func NewHTTPServer(
 
 	// 上传文件的路由
 	r := srv.Route("/")
+
 	r.POST("/system/user/avatar", func(ctx http.Context) error {
+
 		http.SetOperation(ctx, "/api.admin.v1.Sysuser/UpdateAvatar")
+
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return nil, sysUserService.UpdateAvatar(ctx)
 		})
@@ -139,20 +174,31 @@ func NewHTTPServer(
 		if _, err := h(ctx, nil); err != nil {
 			return err
 		}
+
 		return ctx.Result(200, &struct{}{})
+
 	})
+
 	r.POST("/file/upload", func(ctx http.Context) error {
+
 		http.SetOperation(ctx, "/api.admin.v1.Sysuser/UploadFile")
+
 		url, err := sysUserService.UploadFile(ctx)
+
 		if err != nil {
 			return err
 		}
+
 		rep := make(map[string]string)
+
 		rep["url"] = url
+
 		return ctx.Result(200, url)
+
 	})
 
 	srv.Handle("/debug/pprof/", pprof.NewHandler())
 
 	return srv
+
 }

@@ -20,9 +20,9 @@ service Api {
 
   // 获取所有api
   rpc AllApi (AllApiRequest) returns (AllApiReply) {
-      option (google.api.http) = {
-          get: "/system/api/all"
-      };
+    option (google.api.http) = {
+      get: "/system/api/all"
+    };
   };
 
   // 创建api
@@ -112,6 +112,6 @@ message GetPolicyPathByRoleKeyRequest{
   string roleKey = 1;
 };
 message GetPolicyPathByRoleKeyReply{
-    repeated ApiBase apis = 1;
+  repeated ApiBase apis = 1;
 };
 

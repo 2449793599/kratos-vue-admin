@@ -132,3 +132,20 @@ flag.StringVar(&flagconf, "conf", "D:\\workspace\\golang\\src\\github.com\\bytef
 +       //}
 
 ```
+
+
+# 项目结构
+
+1. 程序入库：app/admin/cmd/server/main.go
+2. 配置文件：app/admin/configs/config.yaml
+3. 配置对象：app/admin/internal/conf/conf.proto
+
+
+1. 所有的SERVICE（SERVICE）都注册到SERVER（SERVER）中
+2. SERVICE对象中引用USECASE对象（BIZ）
+3. USECASE对象中引用DATA对象（DB）
+```
+sysApiRepo := data.NewSysApiRepo(dataData, logger)
+sysApiUseCase := biz.NewSysApiUseCase(sysApiRepo, casbinRuleRepo, logger)
+apiService := service.NewApiService(sysApiUseCase, logger, casbinRuleUseCase)
+```

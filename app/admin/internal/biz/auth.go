@@ -15,8 +15,8 @@ import (
 )
 
 type AuthUseCase struct {
-	key      string
-	expire   time.Duration
+	key      string        // JWT加密KEY
+	expire   time.Duration // JWT时长
 	userRepo SysUserRepo
 	roleRepo SysRoleRepo
 	log      *log.Helper
@@ -33,48 +33,79 @@ func NewAuthUseCase(conf *conf.Auth, userRepo SysUserRepo, roleRepo SysRoleRepo,
 }
 
 func (receiver *AuthUseCase) Login(ctx context.Context, req *pb.LoginRequest) (token string, expireAt int64, pErr error) {
+
 	// get user
 	user, err := receiver.userRepo.FindByUsername(ctx, req.Username)
+
 	if err != nil {
+
 		pErr = pb.ErrorUserNotFound("用户名或密码错误")
+
 		return
+
 	}
+
 	if user.Status == constant.StatusUserForbidden {
+
 		pErr = pb.ErrorAccountForbidden("账号被停用")
+
 		return
+
 	}
 
 	//gAuth := util.NewGoogleAuth()
+
 	//code, err := gAuth.GetCode(user.Secret)
-	//
+
 	//if err != nil {
+	//
 	//	pErr = pb.ErrorInternalErr(err.Error())
+	//
 	//	return
+	//
 	//}
 	//
 	//if req.Code != code {
+	//
 	//	pErr = pb.ErrorCodeNotMatch(pkg.ErrGoogleCode)
+	//
 	//	return
+	//
 	//}
 
 	if !util.BcryptCheck(req.Password, user.Password) {
+
 		pErr = pb.ErrorLoginFail(pkg.ErrPassword)
+
 		return
+
 	}
 
 	role, err := receiver.roleRepo.FindByID(ctx, user.RoleID)
+
 	if err != nil {
+
 		pErr = err
+
 		return
+
 	}
 
 	// generate token
 	expire := time.Now().Add(receiver.expire)
+
 	token, err = authz.NewToken(receiver.key, expire, user.ID, user.RoleID, role.RoleKey, user.NickName)
+
 	if err != nil {
+
 		pErr = pb.ErrorLoginFail("generate token failed: %s", err.Error())
+
 		return
+
 	}
+
 	expireAt = expire.Unix()
+
 	return
+
 }

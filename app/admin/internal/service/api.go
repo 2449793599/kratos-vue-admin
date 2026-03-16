@@ -27,10 +27,13 @@ func NewApiService(ac *biz.SysApiUseCase, logger log.Logger, casbinUseCase *biz.
 }
 
 func (a *ApiService) GetApi(ctx context.Context, req *pb.GetApiRequest) (*pb.GetApiReply, error) {
+
 	api, err := a.apiUseCase.GetApiByID(ctx, req.Id)
+
 	if err != nil {
 		return nil, err
 	}
+
 	data := &pb.ApiData{
 		Id:          int32(api.ID),
 		Path:        api.Path,
@@ -40,40 +43,53 @@ func (a *ApiService) GetApi(ctx context.Context, req *pb.GetApiRequest) (*pb.Get
 		CreateTime:  util.NewTimestamp(api.CreatedAt),
 		UpdateTime:  util.NewTimestamp(api.UpdatedAt),
 	}
+
 	return &pb.GetApiReply{
 		Api: data,
 	}, nil
+
 }
 
 func (a *ApiService) ListApi(ctx context.Context, req *pb.ListApiRequest) (*pb.ListApiReply, error) {
+
 	apiList, total, err := a.apiUseCase.ListPage(ctx, req.PageNum, req.PageSize)
+
 	if err != nil {
 		return nil, err
 	}
+
 	data := ConvertApiDataFromApiList(apiList)
+
 	return &pb.ListApiReply{
 		PageNum:  req.PageNum,
 		PageSize: req.PageSize,
 		Total:    total,
 		Data:     data,
 	}, nil
+
 }
 func (a *ApiService) CreateApi(ctx context.Context, req *pb.CreateApiRequest) (*pb.CreateApiReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
 	_, err := a.apiUseCase.CreateApi(ctx, &model.SysAPI{
 		Path:        req.Path,
 		Description: req.Description,
 		APIGroup:    req.ApiGroup,
 		Method:      req.Method,
 	})
+
 	return &pb.CreateApiReply{}, err
+
 }
 func (a *ApiService) UpdateApi(ctx context.Context, req *pb.UpdateApiRequest) (*pb.UpdateApiReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
 	_, err := a.apiUseCase.UpdateApi(ctx, &model.SysAPI{
 		ID:          req.Id,
 		Path:        req.Path,
@@ -81,15 +97,22 @@ func (a *ApiService) UpdateApi(ctx context.Context, req *pb.UpdateApiRequest) (*
 		APIGroup:    req.ApiGroup,
 		Method:      req.Method,
 	})
+
 	return &pb.UpdateApiReply{}, err
+
 }
 func (a *ApiService) DeleteApi(ctx context.Context, req *pb.DeleteApiRequest) (*pb.DeleteApiReply, error) {
+
 	err := a.apiUseCase.DeleteApi(ctx, req.Id)
+
 	return &pb.DeleteApiReply{}, err
+
 }
 
 func (a *ApiService) AllApi(ctx context.Context, _ *pb.AllApiRequest) (*pb.AllApiReply, error) {
+
 	apiList, err := a.apiUseCase.AllApi(ctx)
+
 	if err != nil {
 		return nil, err
 	}
@@ -99,9 +122,11 @@ func (a *ApiService) AllApi(ctx context.Context, _ *pb.AllApiRequest) (*pb.AllAp
 	return &pb.AllApiReply{
 		Data: data,
 	}, nil
+
 }
 
 func (a *ApiService) GetPolicyPathByRoleKey(ctx context.Context, req *pb.GetPolicyPathByRoleKeyRequest) (*pb.GetPolicyPathByRoleKeyReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -113,4 +138,5 @@ func (a *ApiService) GetPolicyPathByRoleKey(ctx context.Context, req *pb.GetPoli
 	return &pb.GetPolicyPathByRoleKeyReply{
 		Apis: apis,
 	}, nil
+
 }

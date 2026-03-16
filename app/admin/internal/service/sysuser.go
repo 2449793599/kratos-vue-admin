@@ -26,6 +26,7 @@ type SysuserService struct {
 }
 
 func NewSysuserService(serverConf *conf.Server, userCase *biz.SysUserUseCase, authCase *biz.AuthUseCase, roleCase *biz.SysRoleUseCase, roleMenuCase *biz.SysRoleMenuUseCase, postCase *biz.SysPostUseCase, deptCase *biz.SysDeptUseCase, logger log.Logger) *SysuserService {
+
 	return &SysuserService{
 		serverConf:   serverConf,
 		userCase:     userCase,
@@ -36,9 +37,11 @@ func NewSysuserService(serverConf *conf.Server, userCase *biz.SysUserUseCase, au
 		deptCase:     deptCase,
 		log:          log.NewHelper(log.With(logger, "module", "service/sysuser")),
 	}
+
 }
 
 func (s *SysuserService) CreateSysuser(ctx context.Context, req *pb.CreateSysuserRequest) (*pb.CreateSysuserReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -60,13 +63,17 @@ func (s *SysuserService) CreateSysuser(ctx context.Context, req *pb.CreateSysuse
 		PostIds:  req.PostIds,
 		Secret:   req.Secret,
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &pb.CreateSysuserReply{}, nil
+
 }
 
 func (s *SysuserService) UpdateSysuser(ctx context.Context, req *pb.UpdateSysuserRequest) (*pb.UpdateSysuserReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
@@ -89,47 +96,63 @@ func (s *SysuserService) UpdateSysuser(ctx context.Context, req *pb.UpdateSysuse
 		PostIds:  req.PostIds,
 		Secret:   req.Secret,
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	return &pb.UpdateSysuserReply{}, nil
+
 }
 
 func (s *SysuserService) DeleteSysuser(ctx context.Context, req *pb.DeleteSysuserRequest) (*pb.DeleteSysuserReply, error) {
+
 	err := s.userCase.DeleteSysUser(ctx, req.Id)
+
 	return &pb.DeleteSysuserReply{}, err
+
 }
 
 func (s *SysuserService) GetSysuser(ctx context.Context, req *pb.GetSysuserRequest) (*pb.GetSysuserReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
 	user, err := s.userCase.FindSysUserById(ctx, req.Id)
+
 	if err != nil {
 		return nil, err
 	}
+
 	role, err := s.roleCase.GetRole(ctx, user.RoleID)
+
 	if err != nil {
 		return nil, err
 	}
 
 	roles, err := s.roleCase.FindRoleByIDList(ctx, util.Split2Int64Slice(user.RoleIds))
+
 	if err != nil {
 		return nil, err
 	}
+
 	posts, err := s.postCase.FindPostByIDList(ctx, util.Split2Int64Slice(user.PostIds))
+
 	if err != nil {
 		return nil, err
 	}
 
 	deptList, err := s.deptCase.GetDeptList(ctx)
+
 	if err != nil {
 		return nil, err
 	}
 
 	replyRole := make([]*pb.RoleData, len(roles))
+
 	for i, d := range roles {
+
 		replyRole[i] = &pb.RoleData{
 			RoleId:     d.ID,
 			RoleName:   d.RoleName,
@@ -143,10 +166,13 @@ func (s *SysuserService) GetSysuser(ctx context.Context, req *pb.GetSysuserReque
 			CreateTime: util.NewTimestamp(d.CreatedAt),
 			UpdateTime: util.NewTimestamp(d.UpdatedAt),
 		}
+
 	}
 
 	replyPost := make([]*pb.PostData, len(posts))
+
 	for i, d := range posts {
+
 		replyPost[i] = &pb.PostData{
 			PostId:     d.ID,
 			PostName:   d.PostName,
@@ -159,13 +185,16 @@ func (s *SysuserService) GetSysuser(ctx context.Context, req *pb.GetSysuserReque
 			CreateTime: util.NewTimestamp(d.CreatedAt),
 			UpdateTime: util.NewTimestamp(d.UpdatedAt),
 		}
+
 	}
 
 	// 没有设置角色会报错
 	roleName := ""
+
 	if role != nil && role.RoleName != "" {
 		roleName = role.RoleName
 	}
+
 	replyUser := &pb.UserData{
 		UserId:     user.ID,
 		NickName:   user.NickName,
@@ -191,6 +220,7 @@ func (s *SysuserService) GetSysuser(ctx context.Context, req *pb.GetSysuserReque
 	}
 
 	replyDepts := biz.ConvertToDeptTreeChildren(deptList)
+
 	reply := &pb.GetSysuserReply{
 		User:    replyUser,
 		Roles:   replyRole,
@@ -199,38 +229,56 @@ func (s *SysuserService) GetSysuser(ctx context.Context, req *pb.GetSysuserReque
 		PostIds: replyUser.PostIds,
 		RoleIds: replyUser.RoleIds,
 	}
+
 	return reply, nil
+
 }
 
 func (s *SysuserService) ListSysuser(ctx context.Context, req *pb.ListSysuserRequest) (*pb.ListSysuserReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
 	users, total, err := s.userCase.ListPage(ctx, req)
+
 	if err != nil {
 		return nil, err
 	}
 
 	deptCache := util.NewCache(func(id int64) (*model.SysDept, error) {
+
 		d, err := s.deptCase.GetDept(ctx, id)
+
 		if d == nil {
 			d = &model.SysDept{}
 		}
+
 		return d, err
+
 	})
+
 	roleCache := util.NewCache(func(id int64) (*model.SysRole, error) {
+
 		d, err := s.roleCase.GetRole(ctx, id)
+
 		if d == nil {
 			d = &model.SysRole{}
 		}
+
 		return d, err
+
 	})
 
 	gAuth := util.NewGoogleAuth()
+
 	replyData := make([]*pb.UserData, len(users))
+
 	for i, user := range users {
+
 		role, _ := roleCache.Get(user.RoleID)
 		dept, _ := deptCache.Get(user.DeptID)
+
 		replyData[i] = &pb.UserData{
 			UserId:     user.ID,
 			NickName:   user.NickName,
@@ -255,6 +303,7 @@ func (s *SysuserService) ListSysuser(ctx context.Context, req *pb.ListSysuserReq
 			Secret:     user.Secret,
 			Qrcode:     gAuth.GetQrcode(user.Secret),
 		}
+
 	}
 
 	return &pb.ListSysuserReply{
@@ -263,26 +312,33 @@ func (s *SysuserService) ListSysuser(ctx context.Context, req *pb.ListSysuserReq
 		PageSize: req.PageSize,
 		Data:     replyData,
 	}, nil
+
 }
 
 func (s *SysuserService) GetCaptcha(context.Context, *pb.GetCaptchaRequest) (*pb.GetCaptchaReply, error) {
+
 	id, content, image := util.Generate()
+
 	if s.serverConf.GetEnv() != conf.Env_dev {
 		content = ""
 	}
+
 	return &pb.GetCaptchaReply{
 		Base64Captcha: image,
 		CaptchaId:     id,
 		Content:       content,
 	}, nil
+
 }
 
 func (s *SysuserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
 	token, expireAt, err := s.authCase.Login(ctx, req)
+
 	if err != nil {
 		return nil, err
 	}
@@ -294,38 +350,51 @@ func (s *SysuserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 }
 
 func (s *SysuserService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.LogoutReply, error) {
+
 	return &pb.LogoutReply{}, nil
+
 }
 
 // Auth 用户权限信息
 func (s *SysuserService) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.AuthReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
 
 	user, err := s.userCase.FindSysUserByUsername(ctx, req.Username)
+
 	if err != nil {
 		return nil, err
 	}
+
 	role, err := s.roleCase.GetRole(ctx, user.RoleID)
+
 	if err != nil {
 		return nil, err
 	}
 
 	permits, err := s.roleMenuCase.GetPermission(ctx, role.ID)
+
 	if err != nil {
 		return nil, err
 	}
 
 	var menus []*pb.MenuTree
+
 	// 被禁用了，菜单显示空
 	if role.Status == constant.StatusMenusForbidden {
+
 		menus = make([]*pb.MenuTree, 0)
+
 	} else {
+
 		menus, err = s.roleMenuCase.SelectMenuRole(ctx, role.RoleName)
+
 		if err != nil {
 			return nil, err
 		}
+
 	}
 
 	pbUser := &pb.AuthReply_User{
@@ -373,14 +442,19 @@ func (s *SysuserService) Auth(ctx context.Context, req *pb.AuthRequest) (*pb.Aut
 		Permissions: permits,
 		Menus:       Build(menus),
 	}, nil
+
 }
 
 func (s *SysuserService) ChangeStatus(ctx context.Context, req *pb.ChangeStatusRequest) (*pb.ChangeStatusReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
 	err := s.userCase.ChangeStatus(ctx, req.UserId, req.Status)
+
 	return &pb.ChangeStatusReply{}, err
+
 }
 
 func (s *SysuserService) UpdateAvatar(ctx context.Context) error {
