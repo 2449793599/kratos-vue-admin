@@ -9,19 +9,19 @@ server:
 data:
   database:
     driver: mysql
-    source: root:123456@tcp(127.0.0.1:3306)/kva?charset=utf8mb4&parseTime=True&loc=Local
+    source: root:xm123456@tcp(10.10.10.96:13306)/kva?charset=utf8mb4&parseTime=True&loc=Local
     maxIdleConns: 10
     maxOpenConns: 20
     logLevel: 'info'
   redis:
-    addr: 127.0.0.1:6379
+    addr: 192.168.0.27:6379
     max_idle: "128"
     max_active: "0"
     idle_timeout: "120"
     read_timeout: 0.2s
     write_timeout: 0.2s
     username:
-    password: "123456"
+    password: "zhiweikejiredispass0987654321"
     database: 6
 
 auth:
@@ -29,7 +29,7 @@ auth:
   expires: 259200s # 259200 = 3天
 
 casbin:
-  path: ../../configs/authz/casbin_model.conf
+  path: D:\workspace\golang\src\github.com\byteflowteam\kratos-vue-admin\app\admin\configs\authz\casbin_model.conf
 
 oss:
   use: local

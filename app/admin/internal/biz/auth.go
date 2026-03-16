@@ -44,18 +44,18 @@ func (receiver *AuthUseCase) Login(ctx context.Context, req *pb.LoginRequest) (t
 		return
 	}
 
-	gAuth := util.NewGoogleAuth()
-	code, err := gAuth.GetCode(user.Secret)
-
-	if err != nil {
-		pErr = pb.ErrorInternalErr(err.Error())
-		return
-	}
-
-	if req.Code != code {
-		pErr = pb.ErrorCodeNotMatch(pkg.ErrGoogleCode)
-		return
-	}
+	//gAuth := util.NewGoogleAuth()
+	//code, err := gAuth.GetCode(user.Secret)
+	//
+	//if err != nil {
+	//	pErr = pb.ErrorInternalErr(err.Error())
+	//	return
+	//}
+	//
+	//if req.Code != code {
+	//	pErr = pb.ErrorCodeNotMatch(pkg.ErrGoogleCode)
+	//	return
+	//}
 
 	if !util.BcryptCheck(req.Password, user.Password) {
 		pErr = pb.ErrorLoginFail(pkg.ErrPassword)

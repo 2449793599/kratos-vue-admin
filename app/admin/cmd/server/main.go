@@ -28,7 +28,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	//flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "D:\\workspace\\golang\\src\\github.com\\byteflowteam\\kratos-vue-admin\\app\\admin\\configs\\config.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger log.Logger, hs *http.Server) *kratos.App {
