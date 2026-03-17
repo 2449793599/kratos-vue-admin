@@ -2,7 +2,7 @@
 
 ## 1. 启动项目
 
-执行初始化
+1. 执行初始化
 
 - windows：参考MAKEFILE文件中的目标进行执行
 ```
@@ -84,7 +84,7 @@ make init
 make all
 ```
 
-前置配置：
+2. 前置配置
 ```
 -//     protoc-gen-go v1.30.0           官方给定的版本
 -//     protoc        v4.23.2           官方给定的版本
@@ -93,18 +93,22 @@ make all
 ```
 需要安装PROTOC和PROTOC-GEN-GO
 
+可选版本还有
+```
+
+```
 
 
-配置文件：app/admin/configs/config.yaml
-1. 配置数据库
-2. 配置REDIS
+3. 配置文件：app/admin/configs/config.yaml
+- 配置数据库 
+- 配置REDIS
 
 配置文件路径
 ```
 flag.StringVar(&flagconf, "conf", "D:\\workspace\\golang\\src\\github.com\\byteflowteam\\kratos-vue-admin\\app\\admin\\configs\\config.yaml", "config path, eg: -conf config.yaml")
 ```
 
-关闭GOOGLE验证码：
+4. 关闭GOOGLE验证码
 ```
 -       gAuth := util.NewGoogleAuth()
 -       code, err := gAuth.GetCode(user.Secret)
@@ -133,7 +137,30 @@ flag.StringVar(&flagconf, "conf", "D:\\workspace\\golang\\src\\github.com\\bytef
 
 ```
 
+5. KRATOS源码替换
 
+GO.MOD中添加依赖
+```
+replace github.com/go-kratos/kratos/v2 => ../kratos
+
+replace github.com/go-kratos/kratos/contrib/config/apollo/v2 => ../kratos/contrib/config/apollo
+
+replace github.com/go-kratos/kratos/contrib/opensergo/v2 => ../kratos/contrib/opensergo
+
+replace github.com/go-kratos/kratos/contrib/registry/consul/v2 => ../kratos/contrib/registry/consul
+
+replace github.com/go-kratos/kratos/contrib/registry/discovery/v2 => ../kratos/contrib/registry/discovery
+
+replace github.com/go-kratos/kratos/contrib/registry/etcd/v2 => ../kratos/contrib/registry/etcd
+
+replace github.com/go-kratos/kratos/contrib/registry/eureka/v2 => ../kratos/contrib/registry/eureka
+
+replace github.com/go-kratos/kratos/contrib/registry/nacos/v2 => ../kratos/contrib/registry/nacos
+
+replace github.com/go-kratos/kratos/contrib/registry/zookeeper/v2 => ../kratos/contrib/registry/zookeeper
+```
+
+---
 # 项目结构
 
 1. 程序入库：app/admin/cmd/server/main.go
