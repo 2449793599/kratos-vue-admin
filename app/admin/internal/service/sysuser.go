@@ -462,28 +462,38 @@ func (s *SysuserService) UpdateAvatar(ctx context.Context) error {
 }
 
 func (s *SysuserService) UpdatePassword(ctx context.Context, req *pb.UpdatePasswordRequest) (*pb.UpdatePasswordReply, error) {
+
 	if err := req.Validate(); err != nil {
 		return nil, err
 	}
+
 	claims := authz.MustFromContext(ctx)
+
 	err := s.userCase.UpdatePassword(ctx, claims.UserID, req.NewPassword, req.OldPassword)
+
 	return &pb.UpdatePasswordReply{}, err
+
 }
 
 // GetPostInit 获取初始化角色岗位信息
 func (s *SysuserService) GetPostInit(ctx context.Context, req *pb.GetPostInitRequest) (*pb.GetPostInitReply, error) {
+
 	// 获取所有角色
 	roleList, err := s.roleCase.FindRoleAll(ctx)
+
 	if err != nil {
 		return nil, err
 	}
+
 	// 获取所有岗位
 	postList, err := s.postCase.FindPostAll(ctx)
+
 	if err != nil {
 		return nil, err
 	}
 
 	replyRoles := make([]*pb.RoleData, len(roleList))
+
 	for i, d := range roleList {
 		replyRoles[i] = &pb.RoleData{
 			RoleId:     d.ID,
@@ -501,7 +511,9 @@ func (s *SysuserService) GetPostInit(ctx context.Context, req *pb.GetPostInitReq
 	}
 
 	replyPosts := make([]*pb.PostData, len(postList))
+
 	for i, d := range postList {
+
 		replyPosts[i] = &pb.PostData{
 			PostId:     d.ID,
 			PostName:   d.PostName,
@@ -514,34 +526,44 @@ func (s *SysuserService) GetPostInit(ctx context.Context, req *pb.GetPostInitReq
 			CreateTime: util.NewTimestamp(d.CreatedAt),
 			UpdateTime: util.NewTimestamp(d.UpdatedAt),
 		}
+
 	}
 
 	return &pb.GetPostInitReply{
 		Roles: replyRoles,
 		Posts: replyPosts,
 	}, nil
+
 }
 
 // GetUserRolePost 获取用户角色岗位信息
 func (s *SysuserService) GetUserRolePost(ctx context.Context, req *pb.GetUserRolePostRequest) (*pb.GetUserRolePostReply, error) {
+
 	claims := authz.MustFromContext(ctx)
+
 	user, err := s.userCase.FindSysUserById(ctx, claims.UserID)
+
 	if err != nil {
 		return nil, err
 	}
+
 	roleIds := util.Split2Int64Slice(user.RoleIds)
 	postIds := util.Split2Int64Slice(user.PostIds)
 
 	roleList, err := s.roleCase.FindRoleByIDList(ctx, roleIds)
+
 	if err != nil {
 		return nil, err
 	}
+
 	postList, err := s.postCase.FindPostByIDList(ctx, postIds)
+
 	if err != nil {
 		return nil, err
 	}
 
 	replyRoles := make([]*pb.RoleData, len(roleList))
+
 	for i, d := range roleList {
 		replyRoles[i] = &pb.RoleData{
 			RoleId:     d.ID,
@@ -559,6 +581,7 @@ func (s *SysuserService) GetUserRolePost(ctx context.Context, req *pb.GetUserRol
 	}
 
 	replyPosts := make([]*pb.PostData, len(postList))
+
 	for i, d := range postList {
 		replyPosts[i] = &pb.PostData{
 			PostId:     d.ID,
@@ -578,16 +601,23 @@ func (s *SysuserService) GetUserRolePost(ctx context.Context, req *pb.GetUserRol
 		Roles: replyRoles,
 		Posts: replyPosts,
 	}, err
+
 }
 
 func (s *SysuserService) GetUserGoogleSecret(ctx context.Context, req *pb.GetUserGoogleSecretRequest) (*pb.GetUserGoogleSecretReply, error) {
+
 	gAuth := util.NewGoogleAuth()
+
 	secret := gAuth.GetSecret()
 	qrcode := gAuth.GetQrcode(secret)
+
 	var rep = &pb.GetUserGoogleSecretReply{}
+
 	rep.Secret = secret
 	rep.Qrcode = qrcode
+
 	return rep, nil
+
 }
 
 func (s *SysuserService) UploadFile(ctx context.Context) (string, error) {

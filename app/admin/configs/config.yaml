@@ -29,7 +29,7 @@ auth:
   expires: 259200s # 259200 = 3天
 
 casbin:
-  path: D:\workspace\golang\src\github.com\byteflowteam\kratos-vue-admin\app\admin\configs\authz\casbin_model.conf
+  path: E:\workspace\golang\src\github.com\byteflowteam\kratos-vue-admin\app\admin\configs\authz\casbin_model.conf
 
 oss:
   use: local

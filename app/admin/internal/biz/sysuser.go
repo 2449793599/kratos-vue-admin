@@ -191,23 +191,32 @@ func (uc *SysUserUseCase) UpdateAvatar(ctx context.Context) error {
 }
 
 func (uc *SysUserUseCase) UploadFile(ctx context.Context) (string, error) {
+
 	file, fileHeader, err := common.FormFile(ctx)
+
 	if err != nil {
 		return "", err
 	}
+
 	defer file.Close()
 
 	ext := filepath.Ext(fileHeader.Filename)
+
 	if !common.IsAllowedFileExt(ext) {
 		return "", errors.New(401, "file type not allowed", "file type not allowed")
 	}
 
 	guid, _ := kgo.KStr.UuidV4()
+
 	filePath := "files/" + guid + ext
+
 	domain, err := uc.uploadRepo.UploadFile(file, filePath)
+
 	if err != nil {
 		return "", err
 	}
-	//return filePath, nil
+
+	// return filePath, nil
 	return domain + "/" + filePath, nil
+
 }

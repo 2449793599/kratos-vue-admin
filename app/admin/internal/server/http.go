@@ -23,7 +23,7 @@ import (
 	"github.com/byteflowteam/kratos-vue-admin/app/admin/internal/service"
 )
 
-func jsonMarshal(res *pb.CommonReply) ([]byte, error) {
+func jsonMarshal(res *pb.CommonReply) ([]byte, error) { // 针对标准消息的编码
 
 	newProto := protojson.MarshalOptions{EmitUnpopulated: true}
 
@@ -49,9 +49,9 @@ func jsonMarshal(res *pb.CommonReply) ([]byte, error) {
 
 func EncoderResponse() http.EncodeResponseFunc {
 
-	return func(w stdhttp.ResponseWriter, request *stdhttp.Request, i interface{}) error {
+	return func(w stdhttp.ResponseWriter, request *stdhttp.Request, i interface{}) error { // 第三个参数为响应内容
 
-		resp := &pb.CommonReply{
+		resp := &pb.CommonReply{ // 统一响应
 			Code:    200,
 			Message: "",
 		}
@@ -60,7 +60,7 @@ func EncoderResponse() http.EncodeResponseFunc {
 
 		var err error
 
-		if m, ok := i.(proto.Message); ok {
+		if m, ok := i.(proto.Message); ok { // 响应内容为标准消息
 
 			payload, err := anypb.New(m)
 
@@ -107,7 +107,7 @@ func EncoderResponse() http.EncodeResponseFunc {
 }
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(
+func NewHTTPServer( // HTTP服务
 	c *conf.Server,
 	s *conf.Auth,
 	casbinRepo biz.CasbinRuleRepo,
@@ -123,7 +123,7 @@ func NewHTTPServer(
 ) *http.Server {
 
 	var opts = []http.ServerOption{
-		http.Middleware(
+		http.Middleware( // 中间件
 			recovery.Recovery(),
 			logging.Server(logger),
 			middleware.Auth(s, casbinRepo),
@@ -151,6 +151,7 @@ func NewHTTPServer(
 
 	srv := http.NewServer(opts...)
 
+	// 注册服务
 	v1.RegisterSysuserHTTPServer(srv, sysUserService)
 	v1.RegisterApiHTTPServer(srv, apiService)
 	v1.RegisterDeptHTTPServer(srv, deptService)

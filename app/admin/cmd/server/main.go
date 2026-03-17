@@ -29,8 +29,8 @@ var (
 )
 
 func init() {
-	//flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
-	flag.StringVar(&flagconf, "conf", "D:\\workspace\\golang\\src\\github.com\\byteflowteam\\kratos-vue-admin\\app\\admin\\configs\\config.yaml", "config path, eg: -conf config.yaml")
+	// flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "E:\\workspace\\golang\\src\\github.com\\byteflowteam\\kratos-vue-admin\\app\\admin\\configs\\config.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger log.Logger, hs *http.Server) *kratos.App {
@@ -53,6 +53,7 @@ func main() {
 
 	flag.Parse()
 
+	// 1. 日志
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
@@ -63,6 +64,7 @@ func main() {
 		"span.id", tracing.SpanID(),
 	)
 
+	// 2. 配置
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
@@ -80,6 +82,7 @@ func main() {
 		panic(err)
 	}
 
+	// 3. 应用
 	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Auth, bc.Casbin, bc.Oss, logger, bc.Data.Redis)
 
 	if err != nil {
@@ -88,6 +91,7 @@ func main() {
 
 	defer cleanup()
 
+	// 4. 启动
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
 		panic(err)
